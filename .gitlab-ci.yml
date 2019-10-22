@@ -1,0 +1,36 @@
+image: registry.gitlab.com/gregputhota/deploytos3/centos_gitlab_awscli_gregputhota_template
+
+stages:
+  - deploy-dev
+  - deploy-prod
+
+variables: 
+  S3_BUCKET_NAME: "tests3deploy"
+  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+  AWS_REGION: $AWS_DEFAULT_REGION
+
+dev-deploy:
+  stage: deploy-dev
+  environment:
+    name: dev
+  script:
+    # AWS CLI Command to copy the required files
+    - aws s3 cp src s3://$S3_BUCKET_NAME/ --recursive --include "*.js" --exclude "*.git"
+  only:
+     - feature\1
+     - develop
+     - master
+  when: manual
+
+prod-deploy:
+  stage: deploy-prod
+  environment:
+    name: prod
+  script:
+    # AWS CLI Command to copy the required files
+    - aws s3 cp src s3://$S3_BUCKET_NAME/ --recursive --include "*.js" --exclude "*.git" 
+  only:
+    - develop
+    - master
+  when: manual
